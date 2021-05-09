@@ -1,0 +1,53 @@
+begin
+age,income,student,credit_rating,buys_computer
+<=30,high,no,fair,no
+<=30,high,no,excellent,no
+31...40,high,no,fair,yes
+>40,medium,no,fair,yes
+>40,low,yes,fair,yes
+>40,low,yes,excellent,no
+31...40,low,yes,excellent,yes
+<=30,medium,no,fair,no
+<=30,low,yes,fair,yes
+>40,medium,yes,fair,yes
+<=30,medium,yes,excellent,yes
+31...40,medium,no,excellent,yes
+31...40,high,yes,fair,yes
+>40,medium,no,excellent,no
+Information Gain
+age,income,student,credit_rating
+0.247,0.029,0.152,0.048
+best attribute,age
+leaf node found
+age:31...40,yes
+
+age:<=30
+age,income,student,credit_rating,buys_computer
+<=30,high,no,fair,no
+<=30,high,no,excellent,no
+<=30,medium,no,fair,no
+<=30,low,yes,fair,yes
+<=30,medium,yes,excellent,yes
+Information Gain
+income,student,credit_rating
+0.571,0.971,0.020
+best attribute,student
+leaf node found
+student:no,no
+student:yes,yes
+
+age:>40
+age,income,student,credit_rating,buys_computer
+>40,medium,no,fair,yes
+>40,low,yes,fair,yes
+>40,low,yes,excellent,no
+>40,medium,yes,fair,yes
+>40,medium,no,excellent,no
+Information Gain
+income,credit_rating
+0.020,0.971
+best attribute,credit_rating
+leaf node found
+credit_rating:fair,yes
+credit_rating:excellent,no
+finish
