@@ -1,0 +1,15 @@
+node
+age
+None
+None
+[{'buys_computer': {'parent': 'age', 'valueOfParent': '31...40', 'value': 'yes'}}]
+node
+student
+age
+<=30
+[{'buys_computer': {'parent': 'student', 'valueOfParent': 'no', 'value': 'no'}}, {'buys_computer': {'parent': 'student', 'valueOfParent': 'yes', 'value': 'yes'}}]
+node
+credit_rating
+age
+>40
+[{'buys_computer': {'parent': 'credit_rating', 'valueOfParent': 'fair', 'value': 'yes'}}, {'buys_computer': {'parent': 'credit_rating', 'valueOfParent': 'excellent', 'value': 'no'}}]

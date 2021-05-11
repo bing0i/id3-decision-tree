@@ -1,5 +1,7 @@
 import math
 import os
+import json
+import ast
 
 
 def readInputFile(path):
@@ -106,6 +108,9 @@ def startDecisionTree(path):
     data = readInputFile(path)
     targetAttribute = data["columnNames"][-1]
     selectedAttributes = [targetAttribute]
+    decisionTree = {}
+    parentAttribute = ""
+    parentValue = ""
 
     with open("result.csv", "w") as outputFile:
         outputFile.write("begin\n")
@@ -119,6 +124,11 @@ def startDecisionTree(path):
             outputFile.write(",".join([str("{:.3f}".format(v)) for v in informationGains.values()]) + "\n")
             outputFile.write("best attribute," + bestAttribute + "\n")
 
+            if parentAttribute == "":
+                decisionTree[bestAttribute] = {"parent": None, "valueOfParent": None, "children": []}
+            elif bestAttribute not in decisionTree.keys():
+                decisionTree[bestAttribute] = {"parent": parentAttribute, "valueOfParent": parentValue, "children": []}
+
             rowValues = countValuesByRow(data["columnAttributes"][bestAttribute], data["columnAttributes"][targetAttribute])
             newRowValues, leaveNodes = removeLeafNode(rowValues)
             if len(leaveNodes) == 0:
@@ -127,7 +137,8 @@ def startDecisionTree(path):
                 outputFile.write("leaf node found\n")
                 for key, value in leaveNodes.items():
                     outputFile.write(bestAttribute + ":" + "".join([k for k in key]) + "," + "".join([v for v in value]) + "\n")
-
+                    decisionTree[bestAttribute]["children"].append({data["columnNames"][-1]: {"parent": bestAttribute, "valueOfParent": key, "value": "".join([v for v in value])}})
+            
             if (len(newRowValues) == 0 and len(unreadPaths) == 0):
                 break
 
@@ -139,9 +150,19 @@ def startDecisionTree(path):
 
             for key in newRowValues.keys():
                 chosenAttribute.append("\n" + bestAttribute + ":" + key + "\n")
+                    
+
             outputFile.write(chosenAttribute[0])
+
+            indexOfColon = chosenAttribute[0].index(":")
+            parentAttribute = chosenAttribute[0][1:indexOfColon]
+            parentValue = chosenAttribute[0][indexOfColon + 1 : len(chosenAttribute[0]) - 1]
+
             chosenAttribute = chosenAttribute[1:]
+
         outputFile.write("finish")
+
+    return decisionTree
 
 
 def removeLeafNode(rowValues):
@@ -177,5 +198,53 @@ def writeNewDatasetToTempFile(data, rowValues, bestAttribute):
     return unreadPaths
 
 
+def writeModelFile(path, decisionTree):
+    with open(path, "w") as modelFile:
+        for attribute, values in decisionTree.items():
+            modelFile.write("node\n")
+            modelFile.write(str(attribute) + "\n")
+            for key, value in values.items():
+                # modelFile.write(str(key) + "\n")
+                modelFile.write(str(value) + "\n")
+
+    return True
+
+
+def readModelFile(path):
+    with open(path, "r") as modelFile:
+        lines = [line.rstrip('\n') for line in modelFile]
+        
+    model = {}
+    isNode = False
+    currentNode = ""
+    values = {
+        0: "parent",
+        1: "valueOfParent",
+        2: "children",
+    }
+    counter = 0
+
+    for line in lines:
+        if line == "node":
+            isNode = True
+            counter = 0
+            continue
+        elif isNode:
+            isNode = False
+            currentNode = line
+            model[currentNode] = {"parent": None, "valueOfParent": None, "children": []}
+        else:
+            if counter == 2:
+                model[currentNode][values[counter]] = ast.literal_eval(line)
+            elif line == "None":
+                model[currentNode][values[counter]] = None
+            else:
+                model[currentNode][values[counter]] = line
+            counter += 1
+
+    return model
+
 if __name__ == "__main__":
-    startDecisionTree("buycomputer.csv")
+    decisionTree = startDecisionTree("buycomputer.csv")
+    writeModelFile("model.id3", decisionTree)
+    model = readModelFile("model.id3")
